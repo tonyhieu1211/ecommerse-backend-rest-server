@@ -28,7 +28,7 @@ mongoose.connect(process.env.MONGO_URL,
     console.log('DB connected');
 })
 
-app.use(cors());
+app.use(cors({limit:'50mb}));
 app.use(express.json());
 app.use('/public', express.static(path.join(__dirname,'uploads')));
 app.use('/api', userRoute);
