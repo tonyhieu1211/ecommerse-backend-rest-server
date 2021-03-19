@@ -16,7 +16,7 @@ exports.createProduct =  (req,res) => {
 
     let promiseArray = []
 
-    req.body.previewSource.map(img => {
+    req.body.productPics.map(img => {
         promiseArray.push(cloudinary.uploader.upload(img, function (error, result) {
             productPics.push({img:result.url});
         }))
