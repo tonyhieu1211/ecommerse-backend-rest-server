@@ -1,39 +1,44 @@
 const Product = require('../models/product');
 const slugify = require('slugify');
 const Category = require('../models/category');
+const { cloudinary } = require('../utils/cloudinary');
 
 
+exports.createProduct =  (req,res) => {
+    
 
 
-exports.createProduct = (req,res) => {
     const {
         name,price,description,category,quantity
     } = req.body;
 
-    console.log('req.user',req.user);
     let productPics = [];
-    if(req.files.length > 0){
-        productPics = req.files.map( file => {
-            return { img: file.filename }
-        });
-    }    
-    
 
+    let promiseArray = []
 
-    const newProduct = new Product({ 
-        name: name,
-        slug: slugify(name),
-        price,
-        description,
-        category,
-        quantity,
-        productPics,
-        createdBy: req.user._id
+    req.body.previewSource.map(img => {
+        promiseArray.push(cloudinary.uploader.upload(img, function (error, result) {
+            productPics.push({img:result.url});
+        }))
     });
 
-    newProduct.save((err, product)=>{
-        if(err) return res.status(400).json({ err });
-        if(product) return res.status(201).json({ product });
+    Promise.all(promiseArray).then(() => {
+        console.log(productPics);
+        const newProduct = new Product({ 
+            name: name,
+            slug: slugify(name),
+            price,
+            description,
+            category,
+            quantity,
+            productPics,
+            createdBy: req.user._id
+        });
+    
+        newProduct.save((err, product)=>{
+            if(err) return res.status(400).json({ err });
+            if(product) return res.status(201).json({ product });
+        }) 
     })
 }
 
