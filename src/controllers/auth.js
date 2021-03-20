@@ -9,12 +9,7 @@ const generateJwtToken = (_id,role) => {
 }
 
 exports.signup = (req, res, next) => {
-    let role = 'user';
-    if(req.originalUrl === '/api/admin/sign-up'){
-       role = 'admin';
-    }
-    console.log(req.body);
-    
+    console.log('hello');
     User.findOne({ email: req.body.email })
     .exec(async (err, user) => {
         if(user) return res.status(400).json({
@@ -38,7 +33,7 @@ exports.signup = (req, res, next) => {
             email,
             hash_password,
             username,
-            role
+            role:'user'
         });
 
         _user.save((err, user) => {
@@ -50,7 +45,8 @@ exports.signup = (req, res, next) => {
 
             if(user){
                 return res.status(201).json({
-                    user
+                    user,
+                    token:generateJwtToken(user._id,user.role)
                 })
             }
         });
