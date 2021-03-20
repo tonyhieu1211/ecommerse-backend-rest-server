@@ -1,45 +1,30 @@
 const Product = require('../models/product');
 const slugify = require('slugify');
 const Category = require('../models/category');
-const { cloudinary } = require('../utils/cloudinary');
 
 
-exports.createProduct =  (req,res) => {
-    
-
-
+exports.createProduct = (req, res) => {
     const {
-        name,price,description,category,quantity
+        name, price, description, category, quantity, imgUrls
     } = req.body;
+    console.log(req.body);
 
-    let productPics = [];
-
-    let promiseArray = []
-
-    req.body.productPics.map(img => {
-        promiseArray.push(cloudinary.uploader.upload(img, function (error, result) {
-            productPics.push({img:result.url});
-        }))
+    const newProduct = new Product({
+        name: name,
+        slug: slugify(name),
+        price,
+        description,
+        category,
+        quantity,
+        productPics: imgUrls,
+        createdBy: req.user._id
     });
 
-    Promise.all(promiseArray).then(() => {
-        console.log(productPics);
-        const newProduct = new Product({ 
-            name: name,
-            slug: slugify(name),
-            price,
-            description,
-            category,
-            quantity,
-            productPics,
-            createdBy: req.user._id
-        });
-    
-        newProduct.save((err, product)=>{
-            if(err) return res.status(400).json({ err });
-            if(product) return res.status(201).json({ product });
-        }) 
+    newProduct.save((err, product) => {
+        if (err) return res.status(400).json({ err });
+        if (product) return res.status(201).json({ product });
     })
+
 }
 
 const getProductsByPrice = (products ,minPrice, maxPrice) => {
