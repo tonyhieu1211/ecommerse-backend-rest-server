@@ -9,7 +9,7 @@ const generateJwtToken = (_id,role) => {
     })
 }
 
-exports.signup = (req, res, next) => {
+exports.adminSignup = (req, res, next) => {
     
     
     User.findOne({ email: req.body.email })
@@ -33,7 +33,7 @@ exports.signup = (req, res, next) => {
             email,
             hash_password,
             username,
-            role
+            role:'admin'
         });
 
         _user.save((err, user) => {
@@ -45,7 +45,8 @@ exports.signup = (req, res, next) => {
 
             if(user){
                 return res.status(201).json({
-                    user
+                    user,
+                    token:generateJwtToken(user._id,user.role)
                 })
             }
         });
@@ -73,7 +74,7 @@ exports.adminSignIn = (req, res)=>{
                 });
             } else if(user.role !== 'admin'){
                 return res.status(400).json({
-                    message: 'User access denied'
+                    message: 'Something went wrong'
                 })
             } else {
                 return res.status(400).json({
